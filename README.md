@@ -1,43 +1,183 @@
 # 🩺 MedScan AI — Medical Report Assistant
 
-> An AI-powered web app that reads your medical reports and explains them in plain, simple language. No medical degree required.
+> An AI-powered RAG application that reads medical reports and explains them in plain language using **Endee** as the vector database.
+
+[![Endee Vector DB](https://img.shields.io/badge/Vector%20DB-Endee-blue)](https://github.com/endee-io/endee)
+[![FastAPI](https://img.shields.io/badge/Backend-FastAPI-green)](https://fastapi.tiangolo.com)
+[![LLaMA](https://img.shields.io/badge/LLM-LLaMA%203.3%2070B-orange)](https://groq.com)
+[![Python](https://img.shields.io/badge/Python-3.10+-yellow)](https://python.org)
 
 ---
 
-## 📸 What It Does
+## 📌 Project Overview
 
-- Upload any medical report (PDF, scanned image, or TXT)
-- Ask questions like *"What is wrong with my report?"* or *"Is my condition serious?"*
-- Get instant AI-powered answers with:
-  - 🔍 Plain-language explanation of your results
-  - 🦠 Possible condition or disease names
-  - 🚦 Severity rating — Mild / Moderate / Critical
-  - ✅ Practical next steps and suggestions
+**MedScan AI** is an intelligent medical report assistant that allows patients to upload their lab reports (PDF or TXT) and ask plain-language questions about their health.
+
+The system uses **Retrieval Augmented Generation (RAG)** with **Endee vector database** to:
+1. Extract text from medical reports (including scanned PDFs via OCR)
+2. Convert text chunks into vector embeddings (384 dimensions)
+3. Store and retrieve vectors using **Endee** for fast semantic search
+4. Generate AI-powered answers using LLaMA 3.3 70B via Groq API
+
+**Key capabilities:**
+- 🔍 Plain-language explanation of medical test results
+- 🦠 Possible disease/condition identification
+- 🚦 Severity rating — Mild / Moderate / Critical
+- ✅ Practical next steps and suggestions
+- 📄 Scanned PDF support via OCR (Tesseract)
+
+---
+
+## 🏗️ System Design
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        MedScan AI System                        │
+└─────────────────────────────────────────────────────────────────┘
+
+  User Browser (index.html)
+       │
+       │  HTTP (upload / query)
+       ▼
+  ┌─────────────┐
+  │  FastAPI    │  ← app/main.py
+  │  Server     │
+  └──────┬──────┘
+         │
+         ▼
+  ┌─────────────────────────────────────────────┐
+  │           RAG Pipeline (rag_pipeline.py)    │
+  │                                             │
+  │  1. Document Ingestion                      │
+  │     ├── PDF text extraction (pypdf)         │
+  │     ├── OCR for scanned PDFs (Tesseract)    │
+  │     └── Text chunking (300 words/chunk)     │
+  │                                             │
+  │  2. Embedding Generation                    │
+  │     └── sentence-transformers              │
+  │         (all-MiniLM-L6-v2, dim=384)        │
+  │                                             │
+  │  3. Vector Storage ──────────────────────► Endee
+  │     └── Upsert chunks into Endee index      Vector DB
+  │         (cosine similarity, INT8)           (port 8080)
+  │                                             │
+  │  4. Retrieval                               │
+  │     └── Query Endee with question vector ◄──┘
+  │         top-k similar chunks returned      │
+  │                                             │
+  │  5. Answer Generation                       │
+  │     └── Groq API (LLaMA 3.3 70B)          │
+  │         with retrieved context             │
+  └─────────────────────────────────────────────┘
+```
+
+### Component Breakdown
+
+| Component | Technology | Purpose |
+|---|---|---|
+| Web Server | FastAPI + Uvicorn | REST API endpoints |
+| Frontend | HTML/CSS/JS | Upload UI + Q&A interface |
+| Document Processor | pypdf + Tesseract OCR | Extract text from PDF/TXT |
+| Embeddings | sentence-transformers | Convert text to 384-dim vectors |
+| **Vector Database** | **Endee** | **Store and retrieve vectors** |
+| LLM | Groq (LLaMA 3.3 70B) | Generate plain-language answers |
+
+---
+
+## 🔷 How Endee is Used
+
+[Endee](https://github.com/endee-io/endee) is the **core vector database** for storing and retrieving medical report embeddings in this RAG pipeline.
+
+### Why Endee?
+- High-performance vector search built for RAG workloads
+- Low latency retrieval even on modest hardware
+- Clean Python SDK with cosine similarity and INT8 precision support
+- Docker-based deployment — easy to run locally
+- Designed for up to 1B vectors on a single node
+
+### Endee Integration
+
+**1. Connect and Create Index** (`app/rag_pipeline.py`):
+```python
+from endee import Endee, Precision
+
+client = Endee()  # connects to localhost:8080
+
+client.create_index(
+    name="medical_reports",
+    dimension=384,         # all-MiniLM-L6-v2 output dimension
+    space_type="cosine",   # cosine similarity search
+    precision=Precision.INT8
+)
+```
+
+**2. Store Vectors (Document Upload)**:
+```python
+index = client.get_index("medical_reports")
+index.upsert([
+    {
+        "id": "chunk_0",
+        "vector": embedding.tolist(),  # 384-dim vector
+        "meta": {"text": chunk_text, "index": 0}
+    }
+])
+```
+
+**3. Retrieve Vectors (Question Answering)**:
+```python
+results = index.query(
+    vector=question_embedding.tolist(),
+    top_k=5  # retrieve top 5 similar chunks
+)
+# Use retrieved chunks as context for LLM
+```
+
+### Full RAG Flow with Endee
+
+```
+User Question: "What is wrong with my report?"
+       │
+       ▼
+Embed question using all-MiniLM-L6-v2
+→ [0.23, -0.11, 0.45, ...] (384 dimensions)
+       │
+       ▼
+Endee.query(vector, top_k=5)
+→ Returns 5 most similar report chunks
+       │
+       ▼
+Build context from top 3 chunks
+       │
+       ▼
+Send to LLaMA 3.3 70B via Groq API
+       │
+       ▼
+AI Answer with disease + severity + next steps
+```
 
 ---
 
 ## 🗂️ Project Structure
 
 ```
-medical-rag/
+medical-rag-endee/
 │
 ├── app/
-│   ├── main.py                # FastAPI server (routes)
-│   ├── rag_pipeline.py        # Core RAG logic — embedding + retrieval + LLM
-│   ├── embeddings.py          # Converts text chunks → vectors
-│   ├── document_processor.py  # Extracts text from PDF/TXT (with OCR support)
-│   ├── llm.py                 # Groq LLM integration (LLaMA 3.3 70B)
+│   ├── main.py                # FastAPI routes (/upload, /query, /health)
+│   ├── rag_pipeline.py        # RAG logic — Endee integration
+│   ├── embeddings.py          # sentence-transformers (all-MiniLM-L6-v2)
+│   ├── document_processor.py  # PDF/TXT extraction + OCR
+│   ├── llm.py                 # Groq LLM (LLaMA 3.3 70B)
 │   └── __init__.py
 │
 ├── static/
-│   ├── index.html             # Full UI (landing page + upload + results)
-│   ├── style.css              # (legacy, styles now inside index.html)
-│   └── script.js              # (legacy, JS now inside index.html)
+│   └── index.html             # Full UI (landing + upload + results)
 │
-├── run.py                     # ✅ Start the app with this
+├── run.py                     # App start script (auto-opens browser)
+├── docker-compose.yml         # Endee vector DB container
 ├── requirements.txt           # Python dependencies
-├── .env                       # Your Groq API key (never share this!)
-└── README.md                  # This file
+├── .env                       # API keys (not committed to git)
+└── README.md
 ```
 
 ---
@@ -47,12 +187,12 @@ medical-rag/
 | Layer | Technology |
 |---|---|
 | Backend | FastAPI + Uvicorn |
-| AI Model | Groq API — LLaMA 3.3 70B Versatile |
-| Embeddings | sentence-transformers (all-MiniLM-L6-v2) |
-| Vector Search | scikit-learn cosine similarity |
-| PDF Reading | pypdf (text PDFs) + pytesseract OCR (scanned PDFs) |
-| OCR Engine | Tesseract + Poppler |
-| Frontend | Pure HTML/CSS/JS (no framework needed) |
+| **Vector Database** | **Endee (Docker)** |
+| AI / LLM | Groq API — LLaMA 3.3 70B Versatile |
+| Embeddings | sentence-transformers (all-MiniLM-L6-v2, 384 dims) |
+| PDF Processing | pypdf (text PDFs) + pytesseract (scanned PDFs) |
+| OCR | Tesseract + Poppler |
+| Frontend | HTML + CSS + JavaScript (single file, no framework) |
 
 ---
 
@@ -60,183 +200,153 @@ medical-rag/
 
 ### Prerequisites
 - Python 3.10+
+- Docker Desktop (for running Endee)
 - Tesseract OCR installed
 - Poppler installed
-- Groq API key (free at [console.groq.com](https://console.groq.com))
+- Groq API key — free at [console.groq.com](https://console.groq.com)
 
 ---
 
-### Step 1 — Clone / Navigate to Project
+### Step 1 — Star & Fork Endee (Mandatory)
+
+1. Go to: https://github.com/endee-io/endee
+2. Click ⭐ **Star**
+3. Click **Fork** → fork to your account
+
+### Step 2 — Clone the Repo
+
 ```bash
-cd medical-rag
+git clone https://github.com/YOUR_USERNAME/medical-rag-endee.git
+cd medical-rag-endee
 ```
 
-### Step 2 — Create Virtual Environment
+### Step 3 — Create Virtual Environment
+
 ```bash
 python -m venv venv
-```
 
-### Step 3 — Activate Virtual Environment
-
-**Windows:**
-```bash
+# Windows
 venv\Scripts\activate
-```
-**Mac/Linux:**
-```bash
+
+# Mac/Linux
 source venv/bin/activate
 ```
 
-> ⚠️ You will see `(venv)` at the start of your terminal. Always activate before running the app.
+### Step 4 — Install Python Dependencies
 
-### Step 4 — Install Dependencies
 ```bash
 pip install fastapi uvicorn pypdf python-multipart scikit-learn
 pip install torch --index-url https://download.pytorch.org/whl/cpu
 pip install sentence-transformers transformers groq python-dotenv
-pip install pytesseract pdf2image pillow
+pip install pytesseract pdf2image pillow endee
 ```
 
-### Step 5 — Install Tesseract OCR (for scanned PDFs)
+### Step 5 — Install Tesseract OCR
 
-**Windows:**
-1. Download installer from: https://github.com/UB-Mannheim/tesseract/wiki
-2. Install to: `C:\Program Files\Tesseract-OCR\`
+**Windows:** Download from https://github.com/UB-Mannheim/tesseract/wiki
 
-### Step 6 — Install Poppler (for scanned PDFs)
+Install to default path: `C:\Program Files\Tesseract-OCR\`
+
+### Step 6 — Install Poppler
 
 **Windows:**
 1. Download from: https://github.com/oschwartz10612/poppler-windows/releases
 2. Extract the zip
-3. Note the path to the `bin` folder (e.g. `C:\Users\YourName\Downloads\poppler\poppler-25.12.0\Library\bin`)
-4. Update this path in `app/document_processor.py`:
+3. Update the path in `app/document_processor.py`:
 ```python
-POPPLER_PATH = r'C:\Users\YourName\Downloads\poppler\poppler-25.12.0\Library\bin'
+POPPLER_PATH = r'C:\path\to\poppler\Library\bin'
 ```
 
 ### Step 7 — Set Up API Key
-```bash
-# Windows
-echo GROQ_API_KEY=your_groq_key_here > .env
+
+Create a `.env` file in the project root:
 ```
-Get your free key from: https://console.groq.com
+GROQ_API_KEY=your_groq_api_key_here
+```
 
----
-
-## ▶️ Running the App
+### Step 8 — Start Endee Vector Database
 
 ```bash
-# Always activate venv first!
-venv\Scripts\activate
+docker-compose up -d
+```
 
-# Then run
+Verify Endee is running — open in browser:
+```
+http://localhost:8080
+```
+You should see the Endee dashboard.
+
+### Step 9 — Run the Application
+
+```bash
 python run.py
 ```
 
----
-
-## ⏳ Important — Browser Popup Behaviour
-
-> **Please read this before using the app!**
-
-When you run `python run.py`, the following happens:
-
-1. The terminal loads the AI model — this takes **3–5 seconds**
-2. After loading, the browser **automatically opens** with the app
-3. The browser may open as a **new window or new tab** — this is normal Windows behaviour and cannot be changed easily
-
-**⚠️ Do NOT close the browser immediately when it opens.**
-The app is fully loaded and ready to use. Take a moment to look at it before deciding to close.
-
-**If the browser opens but the page looks blank:**
-- Wait 2–3 seconds and refresh with `CTRL + R`
-- The server may still be finishing startup
-
-**Recommended:** Bookmark the URL for quick access:
+App opens automatically at:
 ```
 http://localhost:8000/static/index.html
 ```
-Press `CTRL + D` in Chrome to save the bookmark. Then just click it after starting the server.
 
 ---
 
 ## 📋 How to Use
 
-### Step 1 — Upload Your Report
-- Click **"Choose File"** or drag & drop your file
-- Supported: `.pdf` (text or scanned) and `.txt`
-- Wait for the ✅ **"Document processed successfully"** message
+**Step 1 — Upload Report**
+- Click **"Choose File"** or drag & drop
+- Select your `.pdf` or `.txt` medical report
+- Click **"Upload Report"**
+- Wait for ✅ **"Document processed successfully"**
 
-### Step 2 — Ask Questions
-Use the quick-question buttons or type your own:
+**Step 2 — Ask Questions**
+
+Use quick buttons or type your own:
 - *"What is wrong with my report?"*
 - *"Is my condition serious?"*
 - *"What disease might I have?"*
-- *"Explain my haemoglobin level"*
+- *"Explain my key values"*
 - *"What should I do next?"*
 
-### Step 3 — Read Your Results
+**Step 3 — Read Your Results**
+
 Each answer includes:
-- 🔍 What the report shows (in simple language)
-- 🦠 Possible condition name(s)
+- 🔍 Plain-language explanation
+- 🦠 Possible condition/disease name
 - 🚦 Severity: 🟢 Mild / 🟡 Moderate / 🔴 Critical
 - ✅ Suggested next steps
 
 ---
 
-## 📄 Supported File Types
+## ⏳ Important — Browser Popup Behaviour
 
-| Type | Support |
-|---|---|
-| Text-based PDF | ✅ Full support |
-| Scanned PDF (photo of report) | ✅ Via OCR |
-| TXT file | ✅ Full support |
-| JPG / PNG image | ✅ Via OCR |
+When you run `python run.py`:
+1. Server loads the AI model — takes **3–5 seconds**
+2. Browser **automatically opens** with the app
+3. It may open as a **new window** — this is normal
 
-> **Tip:** If your scanned PDF gives incomplete results, type the values manually into a `.txt` file and upload that instead. OCR accuracy depends on image quality.
+> ⚠️ **Do NOT close the browser when it first pops up.**
+> The app is fully loaded and ready to use!
+
+**Tip:** Bookmark `http://localhost:8000/static/index.html` with `CTRL+D` for quick access.
 
 ---
 
 ## 🔧 Troubleshooting
 
-### `ModuleNotFoundError: No module named 'fastapi'`
-You forgot to activate the virtual environment:
-```bash
-venv\Scripts\activate
-python run.py
-```
-
-### `ModuleNotFoundError: No module named 'pdf2image'`
-```bash
-pip install pdf2image pytesseract pillow
-```
-
-### `❌ Could not extract text from PDF`
-Your PDF is a scanned image. Make sure:
-- Tesseract is installed at `C:\Program Files\Tesseract-OCR\tesseract.exe`
-- Poppler path in `document_processor.py` is correct
-- Or just type the values into a `.txt` file and upload that
-
-### App opens in the wrong browser
-This is normal — Python's `webbrowser` module opens your system's default browser.
-To fix: set Chrome as your default browser in Windows Settings, or manually go to:
-```
-http://localhost:8000/static/index.html
-```
-
-### OCR gives incomplete/wrong values
-The scanned report image quality may be low. Best solution:
-- Create a `.txt` file with the values manually typed in
-- Upload the `.txt` instead of the scanned PDF
+| Error | Fix |
+|---|---|
+| `No module named 'endee'` | `pip install endee` |
+| `No module named 'fastapi'` | Activate venv first: `venv\Scripts\activate` |
+| Endee connection failed | Run `docker-compose up -d` first |
+| OCR gives wrong values | Type values into `.txt` file and upload that instead |
+| Browser doesn't open | Go to `http://localhost:8000/static/index.html` manually |
 
 ---
 
 ## 🔒 Privacy
 
-- Your medical data is **never stored permanently**
-- All processing happens **locally on your machine**
-- The only external service used is **Groq API** for AI text generation
-- No data is saved after you close the server
+- Medical data is **never stored permanently** — cleared on server restart
+- All processing runs **locally** on your machine
+- Only text is sent to Groq API for AI generation — no files or images
 
 ---
 
@@ -244,31 +354,41 @@ The scanned report image quality may be low. Best solution:
 
 > This tool is for **informational purposes only**.
 > It is **NOT** a substitute for professional medical advice, diagnosis, or treatment.
-> Always consult a qualified doctor for proper medical guidance.
-
----
-
-## 👩‍💻 Built By
-
-**Sanjana Madi**
-Medical Report Assistant — AI Final Year Project
-Alva's Health Centre Report Testing ✅
+> Always consult a qualified doctor.
 
 ---
 
 ## 📬 Quick Command Reference
 
 ```bash
-# Start app
+# Start Endee vector database
+docker-compose up -d
+
+# Activate venv + start app
 venv\Scripts\activate
 python run.py
 
-# Open in browser
+# Open app in browser
 http://localhost:8000/static/index.html
-
-# Stop server
-CTRL + C
 
 # Check server health
 http://localhost:8000/health
+
+# Endee dashboard
+http://localhost:8080
+
+# Stop app
+CTRL+C
+
+# Stop Endee
+docker-compose down
 ```
+
+---
+
+## 🔗 Links
+
+- **Endee GitHub:** https://github.com/endee-io/endee
+- **Endee Docs:** https://docs.endee.io
+- **Groq API:** https://console.groq.com
+- **This Project:** https://github.com/sanjana56789/medical-rag-endee

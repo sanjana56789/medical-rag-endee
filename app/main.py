@@ -1,46 +1,4 @@
-# from fastapi import FastAPI, UploadFile, File
-# from fastapi.staticfiles import StaticFiles
-# from fastapi.responses import HTMLResponse
-# from app.rag_pipeline import RAGPipeline
 
-# app = FastAPI()
-
-# # serve static files correctly
-# app.mount("/static", StaticFiles(directory="static"), name="static")
-
-# rag = RAGPipeline()
-
-# @app.get("/", response_class=HTMLResponse)
-# def home():
-#     return """
-#     <h2>Server is running</h2>
-#     <a href="/static/index.html">Open App</a>
-#     """
-# # @app.post("/upload")
-# # async def upload(file: UploadFile = File(...)):
-# #     content = await file.read()
-# #     return await rag.ingest_document(file.filename, content)
-
-
-# @app.post("/upload")
-# async def upload(file: UploadFile = File(...)):
-
-#     # ✅ allow multiple file types (IMPORTANT)
-#     if not file.filename.lower().endswith((".txt", ".pdf", ".png", ".jpg", ".jpeg")):
-#         return {"error": "Only TXT, PDF, PNG, JPG files are supported"}
-
-#     content = await file.read()
-
-#     return await rag.ingest_document(file.filename, content)
-
-
-# @app.post("/query")
-# async def query(data: dict):
-#     return await rag.query(data["question"])
-
-# @app.get("/health")
-# async def health():
-#     return {"status": "ok"}
 
 
 from fastapi import FastAPI, UploadFile, File

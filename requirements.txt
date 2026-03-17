@@ -4,8 +4,8 @@
 # scikit-learn
 # pypdf
 # python-multipart
-# openai
-# python-dotenv
+# transformers
+# torch
 
 
 fastapi
@@ -16,3 +16,9 @@ pypdf
 python-multipart
 transformers
 torch
+groq
+python-dotenv
+pytesseract
+pdf2image
+pillow
+endee
