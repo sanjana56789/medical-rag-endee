@@ -1,0 +1,16 @@
+Patient Name: Ravi Kumar
+Age/Sex: 45 Years / Male
+Date: 17-03-2026
+
+THYROID FUNCTION TEST:
+
+TSH: 8.5 mIU/L (Normal: 0.4-4.0 mIU/L) - HIGH
+T3 (Triiodothyronine): 55 ng/dL (Normal: 80-200 ng/dL) - LOW
+T4 (Thyroxine): 3.8 mcg/dL (Normal: 5.0-12.0 mcg/dL) - LOW
+
+HAEMOGLOBIN: 11.2 gm/dl (Normal: 13.5-17.5 gm/dl) - LOW
+TOTAL CHOLESTEROL: 245 mg/dL (Normal: below 200 mg/dL) - HIGH
+LDL CHOLESTEROL: 168 mg/dL (Normal: below 100 mg/dL) - HIGH
+BLOOD GLUCOSE (FASTING): 95 mg/dL (Normal: 70-100 mg/dL) - NORMAL
+BLOOD PRESSURE: 138/88 mmHg (Normal: 120/80) - HIGH
+WEIGHT: 88 kg, HEIGHT: 168 cm, BMI: 31.2 (Obese range)

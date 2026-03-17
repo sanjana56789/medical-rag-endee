@@ -1,0 +1,21 @@
+Patient Name: SANJANA
+Age/Sex: 20 Years / Female
+Lab: Alva's Health Centre, Moodbidri
+Date of Report: 27-06-2025
+
+TEST RESULTS:
+
+HAEMOGLOBIN: 9.9 gm/dl (Normal: 12 - 16 gm/dl) - LOW
+
+TOTAL WBC COUNT: 6,600 cells/cu.mm (Normal: 4000 - 11000 cells/cu.mm) - NORMAL
+
+DIFFERENTIAL COUNT:
+Neutrophils: 60% (Normal: 40-70%) - NORMAL
+Lymphocytes: 36% (Normal: 20-45%) - NORMAL
+Eosinophils: 01% (Normal: 2-8%) - LOW
+Monocytes: 03% (Normal: 1-6%) - NORMAL
+Basophils: 00% (Normal: 0-1%) - NORMAL
+
+ESR: 36 mm/hr (Normal: 0-8 mm/hr) - HIGH
+
+PLATELET COUNT: 3.0 Lakhs/cu.mm (Normal: 1.5 - 4.5 Lakhs/cu.mm) - NORMAL

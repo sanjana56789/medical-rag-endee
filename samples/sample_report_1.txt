@@ -1,0 +1,22 @@
+Patient Name: John Doe
+Age/Sex: 35 Years / Male
+Date: 17-03-2026
+
+BLOOD TEST RESULTS:
+
+HAEMOGLOBIN: 9.5 gm/dl (Normal: 13.5-17.5 gm/dl) - LOW
+TOTAL WBC COUNT: 11,500 cells/cu.mm (Normal: 4000-11000) - HIGH
+NEUTROPHILS: 78% (Normal: 40-70%) - HIGH
+LYMPHOCYTES: 15% (Normal: 20-45%) - LOW
+EOSINOPHILS: 02% (Normal: 2-8%) - NORMAL
+MONOCYTES: 04% (Normal: 1-6%) - NORMAL
+BASOPHILS: 01% (Normal: 0-1%) - NORMAL
+ESR: 42 mm/hr (Normal: 0-15 mm/hr) - HIGH
+PLATELET COUNT: 1.8 Lakhs/cu.mm (Normal: 1.5-4.5 Lakhs) - NORMAL
+
+BLOOD GLUCOSE (FASTING): 185 mg/dL (Normal: 70-100 mg/dL) - HIGH
+HbA1c: 7.8% (Normal: below 5.7%) - HIGH
+LDL CHOLESTEROL: 158 mg/dL (Normal: below 100 mg/dL) - HIGH
+HDL CHOLESTEROL: 38 mg/dL (Normal: above 40 mg/dL) - LOW
+TRIGLYCERIDES: 195 mg/dL (Normal: below 150 mg/dL) - HIGH
+BLOOD PRESSURE: 145/92 mmHg (Normal: 120/80) - HIGH

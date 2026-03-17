@@ -297,6 +297,19 @@ http://localhost:8000/static/index.html
 - Click **"Upload Report"**
 - Wait for ✅ **"Document processed successfully"**
 
+## 🧪 Sample Reports for Testing
+
+Sample reports are available in the `samples/` folder:
+
+| File | Description |
+|---|---|
+| `sample_report_1.txt` | Blood test with diabetes + high cholesterol |
+| `sample_report_2.txt` | Real World report |
+| `sample_report_3.txt` | Thyroid disorder report |
+| `sample_report_4.txt` | Normal healthy report |
+
+Upload any of these to test the app instantly!
+
 **Step 2 — Ask Questions**
 
 Use quick buttons or type your own:
