@@ -1,0 +1,7 @@
+version: '3'
+
+services:
+  endee:
+    image: endeeio/endee-server:latest
+    ports:
+      - "8080:8080"

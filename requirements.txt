@@ -1,0 +1,18 @@
+# fastapi
+# uvicorn
+# sentence-transformers
+# scikit-learn
+# pypdf
+# python-multipart
+# openai
+# python-dotenv
+
+
+fastapi
+uvicorn
+sentence-transformers
+scikit-learn
+pypdf
+python-multipart
+transformers
+torch
