@@ -370,26 +370,46 @@ When you run `python run.py`:
 > Always consult a qualified doctor.
 
 ---
-
 ## 📬 Quick Command Reference
 
+### ▶️ Start the App
 ```bash
-# Start Endee vector database
+# Activate virtual environment first
+venv\Scripts\activate
+
+# Start app (Endee starts automatically)
+python run.py
+```
+
+### 🐳 If Endee doesn't start automatically
+```bash
+# Option 1 — Start Endee manually first
+docker start endee-server
+
+# Option 2 — Use docker-compose
 docker-compose up -d
 
-# Activate venv + start app
-venv\Scripts\activate
+# Then start the app
 python run.py
+```
 
-# Open app in browser
+### 🌐 Open in Browser
+```
 http://localhost:8000/static/index.html
+```
 
-# Check server health
+### 🔍 Check Server Health
+```
 http://localhost:8000/health
+```
 
-# Endee dashboard
+### 📊 Endee Dashboard
+```
 http://localhost:8080
+```
 
+### ⏹️ Stop Everything
+```bash
 # Stop app
 CTRL+C
 
